@@ -1,31 +1,17 @@
 "use client";
 import { useState, ChangeEvent, FormEvent } from 'react';
-import { ApiResponse } from './types';
+import useUpload from '@/lib/hooks/useUpload';
 export default function Home() {
-  const [file, setFile] = useState<File | null>(null);
-  const [response, setResponse] = useState<ApiResponse | null>(null);
-
+  const { file, setFile, uploadFile, status } = useUpload();
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setFile(file);
+    if (event.target.files) {
+      setFile(event.target.files[0]);
     }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!file) {
-      return;
-    }
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-    const result: ApiResponse = await res.json();
-    setResponse(result);
+    uploadFile();
   };
 
   return (
@@ -38,11 +24,11 @@ export default function Home() {
         </button>
       </form>
 
-      {response && (
-        <div className="mt-4">
-          <h2 className="text-xl font-bold">Analysis Result</h2>
-          <p>{response.result}</p>
-        </div>
+      {status.error && (
+        <div className="text-red-500 mt-4">{status.error}</div>
+      )}
+      {status.message && (
+        <div className="text-green-500 mt-4">{status.message}</div>
       )}
     </div>
   );
