@@ -1,4 +1,4 @@
-import Image from 'next/image';
+"use client";
 import { useState, ChangeEvent, FormEvent } from 'react';
 import { ApiResponse } from './types';
 export default function Home() {
