@@ -3,17 +3,18 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import useUpload from '@/lib/hooks/useUpload';
 export default function Home() {
   const { file, setFile, uploadFile, status } = useUpload();
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
+
+  function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
     if (event.target.files) {
       setFile(event.target.files[0]);
     }
-  };
+  }
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     uploadFile();
-  };
-
+  }
+  
   return (
     <div className="container mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">Upload Document for Analysis</h1>
