@@ -13,8 +13,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${roboto.className} ${young_serif.variable} bg-stone-950 p-0 m-0`}
+    <html lang="en" className="dark">
+      <body className={`${roboto.className} ${young_serif.variable} bg-stone-950 text-white p-0 m-0`}
       >
         {children}
       </body>
