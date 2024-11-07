@@ -1,3 +1,3 @@
-export type UploadRequestModel = {
+export interface UploadRequestModel {
   file: File;
 }
