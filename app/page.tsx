@@ -18,7 +18,7 @@ export default function Home() {
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
-    console.log(selectedFile);
+    console.log('EVENT', selectedFile, event);
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
         setFileError('Invalid file type. Please upload a PDF file.');
@@ -30,6 +30,9 @@ export default function Home() {
         setFile(selectedFile);
         setFileError(null);
       }
+    } else {
+      setFileError(null);
+      setFile(null);
     }
   }
 
