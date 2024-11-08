@@ -73,7 +73,7 @@ export default function Home() {
           {fileError && (
             <Alert className="mt-4 border-red-400 text-red-400">
               <AlertCircle className="stroke-red-400 h-4 w-4" />
-              <AlertTitle>File Type Error!</AlertTitle>
+              <AlertTitle>File Type Error.</AlertTitle>
               <AlertDescription>{fileError}</AlertDescription>
             </Alert>
           )}
