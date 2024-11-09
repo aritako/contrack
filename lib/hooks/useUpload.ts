@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useUploadModel, uploadStatus } from './types';
 import { getSignedURL } from '@/app/actions';
+import { computeSHA256 } from '../utils';
 
 export default function useUpload(): useUploadModel {
   const [file, setFile] = useState<File | null>(null);
@@ -14,9 +15,17 @@ export default function useUpload(): useUploadModel {
       setStatus({ message: null, error: 'No file selected.' });
       return;
     }
-
-    const signedURLResult = await getSignedURL();
-    const url = signedURLResult.success.url;
+    const checksum = await computeSHA256(file);
+    const signedURLResult = await getSignedURL(file.type, file.size, checksum);
+    if (signedURLResult.failure !== undefined) {
+      setStatus({ message: null, error: signedURLResult.failure.message });
+      return;
+    }
+    if (!signedURLResult.success) {
+      setStatus({ message: null, error: 'Failed to get signed URL.' });
+      return;
+    }
+    const { url } = signedURLResult.success;
     // Upload file to S3
     try {
       const response: Response = await fetch(url, {
@@ -38,6 +47,7 @@ export default function useUpload(): useUploadModel {
       } else {
         setStatus({ message: null, error: 'An unknown error occurred.' });
       }
+      return;
     }
 
     const formData: FormData = new FormData();
