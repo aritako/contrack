@@ -1,6 +1,7 @@
 'use client';
 import { useState, ChangeEvent, FormEvent, useRef } from 'react';
 import useUpload from '@/lib/hooks/useUpload';
+import {useRouter} from 'next/navigation';
 import { young_serif } from '@/lib/fonts/fonts';
 import './globals.css';
 import './styles.css';
@@ -15,6 +16,7 @@ export default function Home() {
   const [fileError, setFileError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const router = useRouter();
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
@@ -36,10 +38,13 @@ export default function Home() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     console.log('submit', file);
-    uploadFile();
+    await uploadFile();
+    if (status.error === null) {
+      router.push('/analysis');
+    }
   }
 
   return (
