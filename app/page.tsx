@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getSignedURL } from './actions';
 
 export default function Home() {
   const { file, setFile, uploadFile, status } = useUpload();
@@ -45,7 +46,7 @@ export default function Home() {
     }
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>): void {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
     console.log('submit', file);
     uploadFile();
