@@ -2,6 +2,11 @@
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SignedUrlResponse } from './types';
+import crypto from 'crypto';
+const generateFileName = (bytes = 32): string => {
+  return crypto.randomBytes(bytes).toString('hex');
+}
+
 const s3 = new S3Client({
   region: process.env.AWS_BUCKET_REGION!,
   credentials: {
@@ -23,7 +28,7 @@ export async function getSignedURL(type: string, size: number, checksum: string)
 
   const putObjectCommand = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME!,
-    Key: "test-file",
+    Key: generateFileName(),
     ContentType: "application/pdf",
     ContentLength: size,
     ChecksumSHA256: checksum,
