@@ -13,26 +13,35 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 export default function Home() {
   const { file, setFile, uploadFile, status } = useUpload();
   const [fileError, setFileError] = useState<string | null>(null);
-
+  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
-    console.log('EVENT', selectedFile, event);
+
+    if (fileUrl) {
+      URL.revokeObjectURL(fileUrl);
+    }
+
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
         setFileError('Invalid file type. Please upload a PDF file.');
         setFile(null);
+        setFileUrl(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       } else {
         setFile(selectedFile);
         setFileError(null);
+
+        const url = URL.createObjectURL(selectedFile);
+        setFileUrl(url);
       }
     } else {
       setFileError(null);
       setFile(null);
+      setFileUrl(null);
     }
   }
 
@@ -87,6 +96,23 @@ export default function Home() {
           </div>
         )}
       </section>
+      {fileUrl && (
+        <section>
+          <h2 className="young-serif text-2xl font-bold text-center mt-8">
+            Preview
+          </h2>
+          <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
+            <iframe
+              src={fileUrl}
+              width="100%"
+              height="800px"
+              className="rounded-lg"
+              title="PDF Preview"
+            />
+          </div>
+        </section>
+      )}
+
     </main>
   );
 }
