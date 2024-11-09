@@ -49,7 +49,7 @@ export default function Home() {
       </section>
       <section className="flex justify-center items-center flex-col w-full">
         <div className="max-w-xl">
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center mb-8">
             <h2 className="young-serif text-6xl max-w-xl text-center mb-4">
               Review Legal Documents Fast.
             </h2>
@@ -59,7 +59,7 @@ export default function Home() {
             </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex my-4 gap-2">
+          <form onSubmit={handleSubmit} className="flex mb-4 gap-2">
             <Input
               id="file"
               type="file"
