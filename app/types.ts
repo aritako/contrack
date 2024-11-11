@@ -10,3 +10,8 @@ export interface SignedUrlResponse {
     message: string;
   };
 }
+
+export interface PreviewFile {
+  url: string | null;
+  error: string | null;
+}

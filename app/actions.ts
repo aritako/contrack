@@ -3,7 +3,7 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { SignedUrlResponse } from './types';
 import crypto from 'crypto';
-const generateFileName = (bytes = 32): string => {
+const generateFileName = (bytes = 16): string => {
   return crypto.randomBytes(bytes).toString('hex');
 }
 
