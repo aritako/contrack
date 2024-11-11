@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useUploadModel, uploadStatus } from './types';
-import { getSignedURL } from '@/app/actions';
+import { getSignedURL } from '@/app/actions/sign_url_pdf_S3';
 import { computeSHA256 } from '../utils';
 
 export default function useUpload(): useUploadModel {

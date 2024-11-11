@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getSignedURL } from './actions';
+import { getSignedURL } from './actions/sign_url_pdf_S3';
 import { PreviewFile } from './types';
 
 export default function Home() {
