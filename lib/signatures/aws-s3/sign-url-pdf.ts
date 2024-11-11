@@ -1,8 +1,8 @@
 "use server"
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { SignedUrlResponse } from '../../../app/types';
 import crypto from 'crypto';
+import { UploadFileSignedUrlResponse } from './types';
 const generateFileName = (bytes = 16): string => {
   return crypto.randomBytes(bytes).toString('hex');
 }
@@ -17,7 +17,7 @@ const s3 = new S3Client({
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
-export async function getSignedURL(type: string, size: number, checksum: string): Promise<SignedUrlResponse> {
+export async function getSignedURL(type: string, size: number, checksum: string): Promise<UploadFileSignedUrlResponse> {
   if (size > MAX_FILE_SIZE) {
     return { failure: { message: "File size exceeds the limit." } }
   }
@@ -25,10 +25,10 @@ export async function getSignedURL(type: string, size: number, checksum: string)
   if (type !== "application/pdf") {
     return { failure: { message: "Invalid file type. Please upload a PDF file." } }
   }
-
+  const key = generateFileName();
   const putObjectCommand = new PutObjectCommand({
     Bucket: process.env.AWS_BUCKET_NAME!,
-    Key: generateFileName(),
+    Key: key,
     ContentType: "application/pdf",
     ContentLength: size,
     ChecksumSHA256: checksum,
@@ -36,5 +36,5 @@ export async function getSignedURL(type: string, size: number, checksum: string)
 
   const signedUrl = await getSignedUrl(s3, putObjectCommand, { expiresIn: 60 });
 
-  return { success: { url: signedUrl } }
+  return { success: { url: signedUrl, key: key } }
 }
