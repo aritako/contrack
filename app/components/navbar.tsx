@@ -1,10 +1,10 @@
-
+import Link from "next/link"
 
 export default function Navbar(){
   return (
-    <div>
-      <h1 className="young-serif text-3xl font-bold mb-6">Legiscan</h1>
-    </div>
+    <>
+      <Link href="/" className="young-serif text-3xl font-bold mb-6">Legiscan</Link>
+    </>
   )
 
 }
