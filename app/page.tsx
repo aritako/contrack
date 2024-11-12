@@ -10,40 +10,41 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getSignedURL } from '../lib/signatures/aws-s3/sign-url-pdf';
+import { PreviewFile } from './types';
 
 export default function Home() {
   const { file, setFile, uploadFile, status } = useUpload();
-  const [fileError, setFileError] = useState<string | null>(null);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [preview, setPreview] = useState<PreviewFile>({
+    url: null,
+    error: null,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
-
+    const fileUrl = preview.url;
     if (fileUrl) {
       URL.revokeObjectURL(fileUrl);
     }
 
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
-        setFileError('Invalid file type. Please upload a PDF file.');
+        setPreview({ url: null, error: 'Invalid file type. Please upload a PDF.' });
         setFile(null);
-        setFileUrl(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
       } else {
         setFile(selectedFile);
-        setFileError(null);
 
         const url = URL.createObjectURL(selectedFile);
-        setFileUrl(url);
+        setPreview({ url, error: null });
       }
     } else {
-      setFileError(null);
       setFile(null);
-      setFileUrl(null);
+      setPreview({ url: null, error: null });
     }
   }
 
@@ -84,11 +85,11 @@ export default function Home() {
               Analyze <ArrowRight />
             </Button>
           </form>
-          {fileError && (
+          {preview.error && (
             <Alert className="mt-4 border-red-400 text-red-400">
               <AlertCircle className="stroke-red-400 h-4 w-4" />
               <AlertTitle>File Type Error.</AlertTitle>
-              <AlertDescription>{fileError}</AlertDescription>
+              <AlertDescription>{preview.error}</AlertDescription>
             </Alert>
           )}
         </div>
@@ -101,14 +102,14 @@ export default function Home() {
           </div>
         )}
       </section>
-      {fileUrl && (
+      {preview.url && (
         <section>
           <h2 className="young-serif text-2xl font-bold text-center mt-8">
             Preview
           </h2>
           <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
             <iframe
-              src={fileUrl}
+              src={preview.url}
               width="100%"
               height="800px"
               className="rounded-lg"
