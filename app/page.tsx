@@ -58,16 +58,18 @@ export default function Home() {
     console.log('submit', file);
     await uploadFile();
   }
+
   useEffect(() => {
     if (status.key) {
       router.push(`/analysis/${status.key}`);
     }
   }, [status.key, router]);
+
   return (
-    <main className="container mx-auto p-8">
-      <section className="sticky top-0 mb-16">
+    <>
+      {/* <section className="sticky top-0 mb-16">
         <Navbar />
-      </section>
+      </section> */}
       <section className="flex justify-center items-center flex-col w-full">
         <div className="max-w-xl">
           <div className="flex flex-col items-center mb-8">
@@ -124,6 +126,6 @@ export default function Home() {
           </div>
         </section>
       )}
-    </main>
+    </>
   );
 }
