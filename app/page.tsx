@@ -1,7 +1,7 @@
 'use client';
-import { useState, ChangeEvent, FormEvent, useRef } from 'react';
+import { useState, ChangeEvent, FormEvent, useRef, useEffect } from 'react';
 import useUpload from '@/lib/hooks/useUpload';
-import {useRouter} from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { young_serif } from '@/lib/fonts/fonts';
 import './globals.css';
 import './styles.css';
@@ -31,7 +31,10 @@ export default function Home() {
 
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
-        setPreview({ url: null, error: 'Invalid file type. Please upload a PDF.' });
+        setPreview({
+          url: null,
+          error: 'Invalid file type. Please upload a PDF.',
+        });
         setFile(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
@@ -48,15 +51,18 @@ export default function Home() {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>): Promise<void> {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
     event.preventDefault();
     console.log('submit', file);
     await uploadFile();
-    if (status.error === null) {
-      router.push('/analysis');
-    }
   }
-
+  useEffect(() => {
+    if (status.key) {
+      router.push(`/analysis/${status.key}`);
+    }
+  }, [status.key, router]);
   return (
     <main className="container mx-auto p-8">
       <section className="sticky top-0 mb-16">
@@ -118,7 +124,6 @@ export default function Home() {
           </div>
         </section>
       )}
-
     </main>
   );
 }

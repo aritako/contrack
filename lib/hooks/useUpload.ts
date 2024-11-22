@@ -8,22 +8,31 @@ export default function useUpload(): useUploadModel {
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<uploadStatus>({
     message: null,
+    key: null,
     error: null,
   });
 
   const uploadFile: () => Promise<void> = async () => {
     if (!file) {
-      setStatus({ message: null, error: 'No file selected.' });
+      setStatus({ message: null, key: null, error: 'No file selected.' });
       return;
     }
     const checksum = await computeSHA256(file);
     const signedURLResult = await getSignedURL(file.type, file.size, checksum);
     if (signedURLResult.failure !== undefined) {
-      setStatus({ message: null, error: signedURLResult.failure.message });
+      setStatus({
+        message: null,
+        key: null,
+        error: signedURLResult.failure.message,
+      });
       return;
     }
     if (!signedURLResult.success) {
-      setStatus({ message: null, error: 'Failed to get signed URL.' });
+      setStatus({
+        message: null,
+        key: null,
+        error: 'Failed to get signed URL.',
+      });
       return;
     }
     const { url, key } = signedURLResult.success;
@@ -34,10 +43,10 @@ export default function useUpload(): useUploadModel {
         headers: {
           'Content-Type': file.type,
         },
-      })
+      });
 
       if (!responseS3.ok) {
-        throw new Error('Failed to upload file.')
+        throw new Error('Failed to upload file.');
       }
 
       const formData = new FormData();
@@ -48,28 +57,34 @@ export default function useUpload(): useUploadModel {
         contentType: file.type,
         fileSize: file.size,
         uploadTime: new Date().toISOString(),
-      }
+      };
       Object.entries(fileMetadata).forEach(([key, value]) => {
         formData.append(key, value.toString());
       });
       const responseDB: Response = await fetch('api/upload', {
         method: 'POST',
         body: formData,
-      })
+      });
       if (!responseDB.ok) {
-        throw new Error('Failed to upload file.')
+        throw new Error('Failed to upload file.');
       }
 
-      const data: { message: string } = await responseDB.json();
-      setStatus({ message: data.message, error: null });
+      const data: { message: string; key: string } = await responseDB.json();
+      console.log('OBTAIN DATA', data);
+      setStatus({ message: data.message, key: data.key, error: null });
+      console.log('STATUS', status);
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setStatus({ message: null, error: err.message });
+        setStatus({ message: null, key: null, error: err.message });
       } else {
-        setStatus({ message: null, error: 'An unknown error occurred.' });
+        setStatus({
+          message: null,
+          key: null,
+          error: 'An unknown error occurred.',
+        });
       }
       return;
     }
-  }
+  };
   return { file, setFile, uploadFile, status };
 }

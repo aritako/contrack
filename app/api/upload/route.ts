@@ -23,13 +23,13 @@ export async function POST(request: NextRequest) {
   }
 
   const client = await clientPromise;
-  const db = client.db("documents");
+  const db = client.db('documents');
   const movies = db.collection('upload-file');
   const data = await movies.insertOne(uploadRequest);
   return NextResponse.json(
-    { message: "File uploaded successfully." },
+    { message: 'File uploaded successfully.', key: uploadRequest.key },
     { status: 200 }
-  )
+  );
   // const uploadRequest: FileMetadata = {
   //   file: formData.get('file') as File,
   // };

@@ -7,5 +7,6 @@ export interface useUploadModel {
 
 export interface uploadStatus {
   message: string | null;
+  key: string | null;
   error: string | null;
 }
