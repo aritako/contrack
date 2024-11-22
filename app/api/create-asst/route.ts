@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { NextRequest, NextResponse } from 'next/server';
 
 // gets or creates openAI assistant
 export async function GET() {
@@ -13,12 +14,15 @@ export async function GET() {
       (assistant) => assistant.name === 'Filipino Lawyer'
     );
 
-    if (existingAssistant) return Response.json({assistant: existingAssistant});
+    if (existingAssistant){
+      console.log(existingAssistant)
+      return Response.json({assistant: existingAssistant});
+    } 
 
     const newAssistant = await openai.beta.assistants.create({
       instructions: `
-      You are a professional lawyer from the Philippines who conducts legal reviews of documents in the Philippines, so you are knowledgable about the Philippine Laws. 
-      Use your knowledge base to answer questions and complete tasks regarding legal documents.
+      You are a helpful professional lawyer from the Philippines who conducts legal reviews of documents in the Philippines, so you are knowledgable about the Philippine Laws. 
+      Use your knowledge base to answer questions and complete tasks regarding the legal documents you have.
      `,
       name: "Filipino Lawyer",
       tools: [{ type: "file_search" }],
@@ -27,9 +31,9 @@ export async function GET() {
 
     console.log(newAssistant);
 
-    return Response.json({ assistant: newAssistant });
+    return NextResponse.json({ assistant: newAssistant }, {status: 200});
   } catch (e) {
     console.log(e);
-    return Response.json({ error: e });
+    return NextResponse.json({ error: e });
   }
 }
