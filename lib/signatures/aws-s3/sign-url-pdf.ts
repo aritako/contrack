@@ -22,8 +22,9 @@ export async function getSignedURL(type: string, size: number, checksum: string)
     return { failure: { message: "File size exceeds the limit." } }
   }
 
-  if (type !== "application/pdf") {
-    return { failure: { message: "Invalid file type. Please upload a PDF file." } }
+  const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+  if (!validTypes.includes(type)) {
+    return { failure: { message: "Invalid file type. Please upload a PDF or image file." } }
   }
   const key = generateFileName();
   const putObjectCommand = new PutObjectCommand({

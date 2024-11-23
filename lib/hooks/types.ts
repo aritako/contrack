@@ -1,6 +1,8 @@
 export interface useUploadModel {
-  file: File | null;
-  setFile: (file: File | null) => void;
+  filePDF: File | null;
+  setFilePDF: (file: File | null) => void;
+  fileImage: File | null;
+  setFileImage: (file: File | null) => void;
   uploadFile: () => Promise<void>;
   status: uploadStatus;
 }

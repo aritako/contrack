@@ -1,49 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { FileMetadata } from './types';
-import clientPromise from '@/lib/db';
-export async function POST(request: NextRequest) {
-  const formData: FormData = await request.formData();
-  const uploadRequest: FileMetadata = {
-    user_id: 1,
-    key: formData.get('key') as string,
-    fileName: formData.get('fileName') as string,
-    contentType: formData.get('contentType') as string,
-    fileSize: parseInt(formData.get('fileSize') as string),
-    uploadTime: formData.get('uploadTime') as string,
-  };
+import { ComparisonModel } from '@/models/comparison';
+import db_connection from '@/lib/db';
 
-  // Validate uploadRequest fields
-  for (const [key, value] of Object.entries(uploadRequest)) {
-    if (value === null || value === undefined) {
-      return NextResponse.json(
-        { error: `Field '${key}' is required.` },
-        { status: 400 }
-      );
-    }
+export async function POST(request: NextRequest) {
+  try {
+    await db_connection;
+    const body = await request.json();
+    const comparison = new ComparisonModel({
+      comparison_id: body.comparison_id,
+      user_id: body.user_id,
+      pdf: body.pdf,
+      image: body.image,
+      status: body.status,
+      result: body.result,
+    });
+
+    const savedComparison = await comparison.save();
+    console.log('Saved Document:', savedComparison);
+    return NextResponse.json({ message: 'Comparison saved successfully', comparison });
+  } catch (error) {
+    console.error('Error saving comparison', error);
+    return NextResponse.json({ message: `Failed to save comparison: ${error}` }, { status: 500 });
   }
 
-  const client = await clientPromise;
-  const db = client.db('documents');
-  const movies = db.collection('upload-file');
-  const data = await movies.insertOne(uploadRequest);
-  return NextResponse.json(
-    { message: 'File uploaded successfully.', key: uploadRequest.key },
-    { status: 200 }
-  );
-  // const uploadRequest: FileMetadata = {
-  //   file: formData.get('file') as File,
-  // };
 
-  // if (!uploadRequest.file) {
-  //   return NextResponse.json(
-  //     { error: "No files received." },
-  //     { status: 400 }
-  //   );
-  // }
-  // const buffer = Buffer.from(await uploadRequest.file.arrayBuffer());
-  // const filename = uploadRequest.file.name;
-  // return NextResponse.json(
-  //   { message: filename },
-  //   { status: 200 }
-  // );
 }

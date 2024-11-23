@@ -1,27 +1,31 @@
-import { MongoClient } from 'mongodb';
+import mongoose from 'mongoose';
 
 const URI = process.env.MONGODB_URI as string;
-const options = {}
 
 if (!URI) {
-  throw new Error('Please define the MONGODB_URI environment variable inside .env.local');
+  throw new Error('Please define the MONGODB_URI environment variable in .env.local');
 }
 
-let client: MongoClient = new MongoClient(URI, options);
-let clientPromise: Promise<MongoClient>;
+// Ensure global variable is defined for development environment
+declare global {
+  var _db_connection: Promise<typeof mongoose>;
+}
+
+let db_connection: Promise<typeof mongoose>;
 
 if (process.env.NODE_ENV === 'production') {
-  if (!global._mongoClientPromise) {
-    global._mongoClientPromise = new MongoClient(URI, options).connect();
-  }
-  clientPromise = global._mongoClientPromise;
+  // In production, create a new Mongoose connection
+  db_connection = mongoose.connect(URI, {
+    dbName: 'documents',
+  });
 } else {
-  // In development, ensure the client is only created once.
-  if (!global._mongoClientPromise) {
-    client = new MongoClient(URI, options);
-    global._mongoClientPromise = client.connect();
+  // In development, reuse the global Mongoose promise
+  if (!global._db_connection) {
+    global._db_connection = mongoose.connect(URI, {
+      dbName: 'documents',
+    });
   }
-  clientPromise = global._mongoClientPromise;
+  db_connection = global._db_connection;
 }
 
-export default clientPromise;
+export default db_connection;

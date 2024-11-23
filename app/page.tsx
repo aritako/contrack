@@ -14,40 +14,51 @@ import { getSignedURL } from '../lib/signatures/aws-s3/sign-url-pdf';
 import { PreviewFile } from './types';
 
 export default function Home() {
-  const { file, setFile, uploadFile, status } = useUpload();
+  const { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status } = useUpload();
   const [preview, setPreview] = useState<PreviewFile>({
     url: null,
     error: null,
   });
-  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fileInputPDFRef = useRef<HTMLInputElement>(null);
+  const fileInputImageRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  function handleFileChange(event: ChangeEvent<HTMLInputElement>): void {
+  function handlePDFChange(event: ChangeEvent<HTMLInputElement>): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
-    const fileUrl = preview.url;
-    if (fileUrl) {
-      URL.revokeObjectURL(fileUrl);
-    }
+    if (preview.url) URL.revokeObjectURL(preview.url);
 
     if (selectedFile) {
       if (selectedFile.type !== 'application/pdf') {
-        setPreview({
-          url: null,
-          error: 'Invalid file type. Please upload a PDF.',
-        });
-        setFile(null);
-        if (fileInputRef.current) {
-          fileInputRef.current.value = '';
-        }
+        setPreview({ url: null, error: 'Invalid file type. Please upload a PDF.' });
+        setFilePDF(null);
+        if (fileInputPDFRef.current) fileInputPDFRef.current.value = '';
       } else {
-        setFile(selectedFile);
-
-        const url = URL.createObjectURL(selectedFile);
-        setPreview({ url, error: null });
+        setFilePDF(selectedFile);
+        setPreview({ url: URL.createObjectURL(selectedFile), error: null });
       }
     } else {
-      setFile(null);
+      setFilePDF(null);
       setPreview({ url: null, error: null });
+    }
+  }
+
+  function handleImageChange(event: ChangeEvent<HTMLInputElement>): void {
+    const selectedFile = event.target.files ? event.target.files[0] : null;
+    // if (previewImage.url) URL.revokeObjectURL(previewImage.url);
+
+    if (selectedFile) {
+      if (!selectedFile.type.startsWith('image/')) {
+        // setPreviewImage({ url: null, error: 'Invalid file type. Please upload an image.' });
+        setFileImage(null);
+        if (fileInputImageRef.current) fileInputImageRef.current.value = '';
+      } else {
+        setFileImage(selectedFile);
+        // setPreviewImage({ url: URL.createObjectURL(selectedFile), error: null });
+      }
+    } else {
+      setFileImage(null);
+      // setPreviewImage({ url: null, error: null });
     }
   }
 
@@ -55,7 +66,7 @@ export default function Home() {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
-    console.log('submit', file);
+    console.log('submit', filePDF);
     await uploadFile();
   }
 
@@ -67,9 +78,6 @@ export default function Home() {
 
   return (
     <>
-      {/* <section className="sticky top-0 mb-16">
-        <Navbar />
-      </section> */}
       <section className="flex justify-center items-center flex-col w-full">
         <div className="max-w-xl">
           <div className="flex flex-col items-center mb-8">
@@ -86,10 +94,16 @@ export default function Home() {
             <Input
               id="file"
               type="file"
-              onChange={handleFileChange}
-              ref={fileInputRef}
+              onChange={handlePDFChange}
+              ref={fileInputPDFRef}
             />
-            <Button type="submit" disabled={!file}>
+            <Input
+              id="image"
+              type="file"
+              onChange={handleImageChange}
+              ref={fileInputImageRef}
+            />
+            <Button type="submit" disabled={!filePDF}>
               Analyze <ArrowRight />
             </Button>
           </form>

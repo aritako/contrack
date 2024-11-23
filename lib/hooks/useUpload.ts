@@ -1,72 +1,89 @@
 import { useState } from 'react';
+import { FileMetadata } from '@/models/comparison';
 import { useUploadModel, uploadStatus } from './types';
 import { getSignedURL } from '@/lib/signatures/aws-s3/sign-url-pdf';
 import { computeSHA256 } from '../utils';
-import { FileMetadata } from '@/app/api/upload/types';
+import { ComparisonDocument } from '@/models/comparison';
+import { v4 as uuidv4 } from 'uuid';
 
 export default function useUpload(): useUploadModel {
-  const [file, setFile] = useState<File | null>(null);
+  const [filePDF, setFilePDF] = useState<File | null>(null);
+  const [fileImage, setFileImage] = useState<File | null>(null);
   const [status, setStatus] = useState<uploadStatus>({
     message: null,
     key: null,
     error: null,
   });
 
-  const uploadFile: () => Promise<void> = async () => {
-    if (!file) {
-      setStatus({ message: null, key: null, error: 'No file selected.' });
-      return;
-    }
+  const validateSignedURL: (file: File) => Promise<{ url: string; key: string }> = async (file) => {
     const checksum = await computeSHA256(file);
     const signedURLResult = await getSignedURL(file.type, file.size, checksum);
     if (signedURLResult.failure !== undefined) {
-      setStatus({
-        message: null,
-        key: null,
-        error: signedURLResult.failure.message,
-      });
-      return;
+      throw new Error(signedURLResult.failure.message);
     }
     if (!signedURLResult.success) {
-      setStatus({
-        message: null,
-        key: null,
-        error: 'Failed to get signed URL.',
-      });
+      throw new Error('Failed to get signed URL.');
+    }
+    return signedURLResult.success;
+  }
+
+  const uploadFile: () => Promise<void> = async () => {
+    if (!filePDF || !fileImage) {
+      setStatus({ message: null, key: null, error: 'No file selected.' });
       return;
     }
-    const { url, key } = signedURLResult.success;
     try {
-      const responseS3: Response = await fetch(url, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
-      });
+      const pdfSignedURL = await validateSignedURL(filePDF);
+      const imageSignedURL = await validateSignedURL(fileImage);
+      await Promise.all([
+        fetch(pdfSignedURL.url, {
+          method: 'PUT',
+          body: filePDF,
+          headers: { 'Content-Type': filePDF.type },
+        }),
+        fetch(imageSignedURL.url, {
+          method: 'PUT',
+          body: fileImage,
+          headers: { 'Content-Type': fileImage.type },
+        }),
+      ]);
 
-      if (!responseS3.ok) {
-        throw new Error('Failed to upload file.');
+      const pdfMetadata: FileMetadata = {
+        key: pdfSignedURL.key,
+        fileName: filePDF.name,
+        contentType: filePDF.type,
+        fileSize: filePDF.size,
+        uploadTime: new Date(),
+      }
+      const imageMetadata: FileMetadata = {
+        key: imageSignedURL.key,
+        fileName: fileImage.name,
+        contentType: fileImage.type,
+        fileSize: fileImage.size,
+        uploadTime: new Date(),
       }
 
-      const formData = new FormData();
-      const fileMetadata: FileMetadata = {
+      const comparisonMetadata: Partial<ComparisonDocument> = {
+        comparison_id: uuidv4(),
         user_id: 1,
-        key: key,
-        fileName: file.name,
-        contentType: file.type,
-        fileSize: file.size,
-        uploadTime: new Date().toISOString(),
-      };
-      Object.entries(fileMetadata).forEach(([key, value]) => {
-        formData.append(key, value.toString());
-      });
+        pdf: pdfMetadata,
+        image: imageMetadata,
+        status: 'pending',
+        result: null,
+      } as ComparisonDocument;
+
+      // Object.entries(ComparisonMetadata).forEach(([key, value]) => {
+      //   formData.append(key, value);
+      // });
+
       const responseDB: Response = await fetch('api/upload', {
         method: 'POST',
-        body: formData,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(comparisonMetadata),
       });
       if (!responseDB.ok) {
-        throw new Error('Failed to upload file.');
+        console.log('RESPONSE DB', responseDB);
+        throw new Error(`Failed to upload file. ${responseDB.statusText}`);
       }
 
       const data: { message: string; key: string } = await responseDB.json();
@@ -86,5 +103,5 @@ export default function useUpload(): useUploadModel {
       return;
     }
   };
-  return { file, setFile, uploadFile, status };
+  return { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status };
 }
