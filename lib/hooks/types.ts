@@ -1,3 +1,5 @@
+import { ComparisonDocument } from "@/models/comparison";
+
 export interface useUploadModel {
   filePDF: File | null;
   setFilePDF: (file: File | null) => void;
@@ -11,4 +13,9 @@ export interface uploadStatus {
   message: string | null;
   key: string | null;
   error: string | null;
+}
+
+export interface CreateComparisonResponse {
+  message: string;
+  body: ComparisonDocument;
 }

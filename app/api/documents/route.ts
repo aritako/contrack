@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     const savedComparison = await comparison.save();
     console.log('Saved Document:', savedComparison);
-    return NextResponse.json({ message: 'Comparison saved successfully', comparison });
+    return NextResponse.json({ message: 'Comparison saved successfully', body: comparison });
   } catch (error) {
     console.error('Error saving comparison', error);
     return NextResponse.json({ message: `Failed to save comparison: ${error}` }, { status: 500 });

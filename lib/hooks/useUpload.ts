@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { FileMetadata } from '@/models/comparison';
-import { useUploadModel, uploadStatus } from './types';
+import { useUploadModel, uploadStatus, CreateComparisonResponse } from './types';
 import { getSignedURL } from '@/lib/signatures/aws-s3/sign-url-pdf';
 import { computeSHA256 } from '../utils';
 import { ComparisonDocument } from '@/models/comparison';
@@ -72,23 +72,20 @@ export default function useUpload(): useUploadModel {
         result: null,
       } as ComparisonDocument;
 
-      // Object.entries(ComparisonMetadata).forEach(([key, value]) => {
-      //   formData.append(key, value);
-      // });
 
-      const responseDB: Response = await fetch('api/documents', {
+      const createComparison: Response = await fetch('api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comparisonMetadata),
       });
-      if (!responseDB.ok) {
-        console.log('RESPONSE DB', responseDB);
-        throw new Error(`Failed to upload file. ${responseDB.statusText}`);
+      if (!createComparison.ok) {
+        console.log('API RESPONSE', createComparison);
+        throw new Error(`Failed to upload file. ${createComparison.statusText}`);
       }
 
-      const data: { message: string; key: string } = await responseDB.json();
+      const data: CreateComparisonResponse = await createComparison.json();
       console.log('OBTAIN DATA', data);
-      setStatus({ message: data.message, key: data.key, error: null });
+      setStatus({ message: null, key: data.body.comparison_id, error: null });
       console.log('STATUS', status);
     } catch (err: unknown) {
       if (err instanceof Error) {
