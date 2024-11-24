@@ -2,6 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ComparisonModel } from '@/models/comparison';
 import db_connection from '@/lib/db';
 
+export async function GET() {
+  try {
+    await db_connection
+    const result = await ComparisonModel.find({})
+    console.log('Result:', result);
+    return NextResponse.json(result, { status: 200 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+  }
+}
+
+
 export async function POST(request: NextRequest) {
   try {
     await db_connection;

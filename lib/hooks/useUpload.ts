@@ -76,7 +76,7 @@ export default function useUpload(): useUploadModel {
       //   formData.append(key, value);
       // });
 
-      const responseDB: Response = await fetch('api/upload', {
+      const responseDB: Response = await fetch('api/documents', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(comparisonMetadata),
