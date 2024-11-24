@@ -18,7 +18,7 @@ export default function RootLayout({
       <body className={`${roboto.className} ${young_serif.variable} bg-stone-950 text-white p-0 m-0`}
       >
         <main className="container mx-auto p-8">
-          <section className="sticky top-0 mb-16">
+          <section className="mb-8">
             <Navbar />
           </section>
           {children}
