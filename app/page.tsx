@@ -48,17 +48,21 @@ export default function Home() {
     // if (previewImage.url) URL.revokeObjectURL(previewImage.url);
 
     if (selectedFile) {
-      if (!selectedFile.type.startsWith('image/')) {
+      // if (!selectedFile.type.startsWith('image/')) {
+      if (selectedFile.type !== 'application/pdf') {
         // setPreviewImage({ url: null, error: 'Invalid file type. Please upload an image.' });
+        setPreview({ url: null, error: 'Invalid file type. Please upload a PDF.' });
         setFileImage(null);
         if (fileInputImageRef.current) fileInputImageRef.current.value = '';
       } else {
         setFileImage(selectedFile);
         // setPreviewImage({ url: URL.createObjectURL(selectedFile), error: null });
+        setPreview({ url: URL.createObjectURL(selectedFile), error: null });
       }
     } else {
       setFileImage(null);
       // setPreviewImage({ url: null, error: null });
+      setPreview({ url: null, error: null });
     }
   }
 
@@ -99,7 +103,7 @@ export default function Home() {
             <Input
               id="file"
               type="file"
-              onChange={handlePDFChange}
+              onChange={handleImageChange}
               ref={fileInputPDFRef}
             />
             <Button type="submit" disabled={!filePDF}>

@@ -1,6 +1,5 @@
-"use client"
-import Navbar from "@/app/components/navbar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+"use client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Card,
   CardContent,
@@ -8,10 +7,15 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { ComparisonDocument, FileMetadata } from "@/models/comparison";
 import { useParams } from "next/navigation";
+import Tesseract from "tesseract.js";
+import { differences } from "@/lib/utils";
+import * as pdfjs from "pdfjs-dist";
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function Page({
   params,
@@ -19,15 +23,12 @@ export default function Page({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = useParams();
-  const analysisContent = `
-  <p>This document has been analyzed for potential conflicts with Philippine laws. Here are some insights:</p>
-  <ul>
-    <li><strong>Section 1:</strong> Compliance with Republic Act No. 9165 (Comprehensive Dangerous Drugs Act).</li>
-    <li><strong>Section 2:</strong> Potential violation of the Civil Code of the Philippines regarding contracts.</li>
-    <li><strong>Section 3:</strong> Analysis of terms and clauses in light of recent Supreme Court rulings.</li>
-  </ul>
-  `;
+
   const [comparisonData, setComparisonData] = useState<ComparisonDocument>();
+  const [ocrContent1, setOcrContent1] = useState<string | null>(null);
+  const [ocrContent2, setOcrContent2] = useState<string | null>(null);
+  const [diffContent, setDiffContent] = useState<JSX.Element | null>(null);
+
   useEffect(() => {
     if (!slug) {
       return;
@@ -36,11 +37,24 @@ export default function Page({
       try {
         const response = await fetch(`/api/documents?comparison_id=${slug}`);
         if (!response.ok) {
-          throw new Error('Failed to fetch comparison data');
+          throw new Error("Failed to fetch comparison data");
         }
         const data = await response.json();
         console.log("DATA RETRIEVED", data);
         setComparisonData(data);
+
+        const pdfUrl1 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf.key}`;
+        const pdfUrl2 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.image.key}`;
+        const [ocrText1, ocrText2] = await Promise.all([
+          extractTextFromPdf(pdfUrl1),
+          extractTextFromPdf(pdfUrl2),
+        ]);
+
+        setOcrContent1(ocrText1);
+        setOcrContent2(ocrText2);
+
+        const differencesContent = differences(ocrText1, ocrText2);
+        setDiffContent(differencesContent);
       } catch (error) {
         console.error(error);
       }
@@ -48,79 +62,123 @@ export default function Page({
     fetchData();
   }, [slug]);
 
+  const extractTextFromPdf = async (pdfUrl: string) => {
+    const pdf = await pdfjs.getDocument(pdfUrl).promise;
+    const numPages = pdf.numPages;
+    let fullText = "";
+
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+
+      if (context) {
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        await page.render({ canvasContext: context, viewport }).promise;
+
+        const result = await Tesseract.recognize(canvas.toDataURL(), "eng", {
+          logger: (m) => console.log(m),
+        });
+        fullText += result.data.text + "\n";
+      }
+    }
+    return fullText;
+  };
+
   return (
-    <div className="flex flex-col p-8">
+    <div className="flex flex-col">
       <div className="grid lg:grid-cols-2">
         {/* Left side: PDF Viewer */}
         <div className="h-screen pl-8 pr-8 pb-8">
-          {comparisonData?.pdf.key ? (
-            <iframe
-              src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf.key}`}
-              width="100%"
-              height="100%"
-              title="Uploaded PDF"
-              className=""
-            ></iframe>
-          ) : (
-            <p>Loading PDF...</p>
-          )}
-        </div>
-        <div className="h-screen pl-8 pr-8 pb-8">
-          {comparisonData?.pdf.key ? (
-            <iframe
-              src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.image.key}`}
-              width="100%"
-              height="100%"
-              title="Uploaded Image"
-              className=""
-            ></iframe>
-          ) : (
-            <p>Loading Image...</p>
-          )}
+          <Tabs defaultValue="PDF1" className="">
+            <TabsList>
+              <TabsTrigger value="PDF1">PDF 1</TabsTrigger>
+              <TabsTrigger value="PDF2">PDF 2</TabsTrigger>
+            </TabsList>
+            <TabsContent value="PDF1">
+              {comparisonData?.pdf.key ? (
+                <iframe
+                  src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf.key}`}
+                  width="100%"
+                  height="800px"
+                  title="Uploaded PDF"
+                  className="flex-grow"
+                ></iframe>
+              ) : (
+                <p>Loading PDF...</p>
+              )}
+            </TabsContent>
+            <TabsContent value="PDF2">
+              <Card>
+                {comparisonData?.pdf.key ? (
+                  <iframe
+                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.image.key}`}
+                    width="100%"
+                    height="800px"
+                    title="Uploaded Image"
+                    className=""
+                  ></iframe>
+                ) : (
+                  <p>Loading PDF...</p>
+                )}
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
         {/* Right side: Analysis */}
         <div className="pl-4">
-          <Tabs defaultValue="Relevant Laws" className="w-full">
+          <Tabs defaultValue="Differences" className="w-full">
             <TabsList>
-              <TabsTrigger value="Relevant Laws">Relevant Laws</TabsTrigger>
-              <TabsTrigger value="Issues">Issues</TabsTrigger>
-              <TabsTrigger value="Revisions">Revisions</TabsTrigger>
+              <TabsTrigger value="Differences">Differences</TabsTrigger>
+              <TabsTrigger value="Content1">Content 1</TabsTrigger>
+              <TabsTrigger value="Content2">Content 2</TabsTrigger>
             </TabsList>
-            <TabsContent value="Relevant Laws">
+            <TabsContent value="Differences">
               <Card>
                 <CardHeader>
-                  <CardTitle>Legal Analysis</CardTitle>
-                  <CardDescription>Card Description</CardDescription>
+                  <CardTitle>Differences with OCR scan</CardTitle>
+                  <CardDescription>
+                    <span className="text-green-500">additions</span>{" "}
+                    <span className="text-red-400">deletions</span>
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div dangerouslySetInnerHTML={{ __html: analysisContent }} />
+                  <div className="whitespace-pre-wrap">{diffContent}</div>
                 </CardContent>
               </Card>
             </TabsContent>
-            <TabsContent value="Issues">
+            <TabsContent value="Content1">
               <Card>
                 <CardHeader>
-                  <CardTitle>Issues Found</CardTitle>
-                  <CardDescription>Card Description</CardDescription>
+                  <CardTitle>OCR scan of PDF 1</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div dangerouslySetInnerHTML={{ __html: analysisContent }} />
+                  {ocrContent2 ? (
+                    <div className="whitespace-pre-wrap">{ocrContent1}</div>
+                  ) : (
+                    <p>Loading OCR content...</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
-            <TabsContent value="Revisions">
+            <TabsContent value="Content2">
               <Card>
                 <CardHeader>
-                  <CardTitle>Suggested Revisions</CardTitle>
-                  <CardDescription>Card Description</CardDescription>
+                  <CardTitle>OCR scan of PDF 2</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div dangerouslySetInnerHTML={{ __html: analysisContent }} />
+                  {ocrContent2 ? (
+                    <div className="whitespace-pre-wrap">{ocrContent2}</div>
+                  ) : (
+                    <p>Loading OCR content...</p>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
           </Tabs>
-
         </div>
       </div>
     </div>
