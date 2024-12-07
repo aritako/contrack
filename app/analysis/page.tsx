@@ -13,21 +13,15 @@ import { differences } from "@/lib/utils"
 export default function AnalysisPage() {
 
     const analysisContent = `
-    <p>This document has been analyzed for potential conflicts with Philippine laws. Here are some insights:</p>
-    <ul>
-      <li><strong>Section 1:</strong> Compliance with Republic Act No. 9165 (Comprehensive Dangerous Drugs Act).</li>
-      <li><strong>Section 2:</strong> Potential violation of the Civil Code of the Philippines regarding contracts.</li>
-      <li><strong>Section 3:</strong> Analysis of terms and clauses in light of recent Supreme Court rulings.</li>
-    </ul>
+      Section 1: Compliance with Republic Act No. 9165 (Comprehensive Dangerous Drugs Act).
+      Section 2: Potential violation of the Civil Code of the Philippines regarding contracts.
+      Section 3: Analysis of terms and clauses in light of recent Supreme Court rulings.
     `;
 
     const ocrContent = `
-    <p>This document has been analyzed for potential conflicts with philippine law. Here are some insights:</p>
-    <ul>
-      <li><strong>Section 1:</strong> Compliance with Republic Act No. 8123 (Comprehensive Drugs Act).</li>
-      <li><strong>Section 2:</strong> Potential violation of the Caval Code of the Philippines regarding contracts.</li>
-      <li><strong>Section 3:</strong> Analysis of terms in light of recent Supreme Court rulings.</li>
-    </ul>
+      Section 1: Compliance with republic Act No. 1234 (Comprehensive Drugs Act).
+      Section 2: Potential violation of the Caval Code of the philippines regarding contracts.
+      Section 6: Analysis of terms and clauses in light of recent Supreme Court rulings and cases.
     `;
 
     const diffContent = differences(analysisContent, ocrContent);
