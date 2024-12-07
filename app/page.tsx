@@ -85,8 +85,7 @@ export default function Home() {
               Review Legal Documents Fast.
             </h2>
             <span className="text-lg text-center">
-              Effortlessly Spot Philippine Laws, Legal Issues and Agreement
-              Contradictions with AI-Powered Insights.
+              Effortlessly Spot Differences between Hard and Soft copies of Contracts with AI-Powered Readers.
             </span>
           </div>
 
@@ -98,10 +97,10 @@ export default function Home() {
               ref={fileInputPDFRef}
             />
             <Input
-              id="image"
+              id="file"
               type="file"
-              onChange={handleImageChange}
-              ref={fileInputImageRef}
+              onChange={handlePDFChange}
+              ref={fileInputPDFRef}
             />
             <Button type="submit" disabled={!filePDF}>
               Analyze <ArrowRight />
