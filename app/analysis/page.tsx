@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { differences } from "@/lib/utils"
 
 export default function AnalysisPage() {
 
@@ -19,6 +20,17 @@ export default function AnalysisPage() {
       <li><strong>Section 3:</strong> Analysis of terms and clauses in light of recent Supreme Court rulings.</li>
     </ul>
     `;
+
+    const ocrContent = `
+    <p>This document has been analyzed for potential conflicts with philippine law. Here are some insights:</p>
+    <ul>
+      <li><strong>Section 1:</strong> Compliance with Republic Act No. 8123 (Comprehensive Drugs Act).</li>
+      <li><strong>Section 2:</strong> Potential violation of the Caval Code of the Philippines regarding contracts.</li>
+      <li><strong>Section 3:</strong> Analysis of terms in light of recent Supreme Court rulings.</li>
+    </ul>
+    `;
+
+    const diffContent = differences(analysisContent, ocrContent);
 
     return (
         <div className = "flex flex-col p-8">
@@ -42,6 +54,7 @@ export default function AnalysisPage() {
                         <TabsTrigger value="Relevant Laws">Relevant Laws</TabsTrigger>
                         <TabsTrigger value="Issues">Issues</TabsTrigger>
                         <TabsTrigger value="Revisions">Revisions</TabsTrigger>
+                        <TabsTrigger value="Differences">Differences</TabsTrigger>
                     </TabsList>
                     <TabsContent value="Relevant Laws">
                         <Card>
@@ -73,6 +86,17 @@ export default function AnalysisPage() {
                         </CardHeader>
                         <CardContent>
                             <div dangerouslySetInnerHTML={{ __html: analysisContent }} />
+                        </CardContent>
+                        </Card>
+                    </TabsContent>
+                    <TabsContent value="Differences">
+                        <Card>
+                        <CardHeader>
+                            <CardTitle>Differences with OCR scan</CardTitle>
+                            <CardDescription>Card Description</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div>{diffContent}</div>
                         </CardContent>
                         </Card>
                     </TabsContent>
