@@ -99,20 +99,22 @@ export default function Page({
               <TabsTrigger value="PDF2">PDF 2</TabsTrigger>
             </TabsList>
             <TabsContent value="PDF1">
-              {comparisonData?.pdf.key ? (
-                <iframe
-                  src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf.key}`}
-                  width="100%"
-                  height="800px"
-                  title="Uploaded PDF"
-                  className="flex-grow"
-                ></iframe>
-              ) : (
-                <p>Loading PDF...</p>
-              )}
+              <div className="w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
+                {comparisonData?.pdf.key ? (
+                  <iframe
+                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf.key}`}
+                    width="100%"
+                    height="800px"
+                    title="Uploaded PDF"
+                    className="flex-grow"
+                  ></iframe>
+                ) : (
+                  <p>Loading PDF...</p>
+                )}
+              </div>
             </TabsContent>
             <TabsContent value="PDF2">
-              <Card>
+              <div className="w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
                 {comparisonData?.pdf.key ? (
                   <iframe
                     src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.image.key}`}
@@ -124,7 +126,7 @@ export default function Page({
                 ) : (
                   <p>Loading PDF...</p>
                 )}
-              </Card>
+              </div>
             </TabsContent>
           </Tabs>
         </div>
@@ -137,18 +139,16 @@ export default function Page({
               <TabsTrigger value="Content2">Content 2</TabsTrigger>
             </TabsList>
             <TabsContent value="Differences">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Differences with OCR scan</CardTitle>
-                  <CardDescription>
-                    <span className="text-green-500">additions</span>{" "}
-                    <span className="text-red-400">deletions</span>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="whitespace-pre-wrap">{diffContent}</div>
-                </CardContent>
-              </Card>
+              <CardHeader>
+                <CardTitle>Differences with OCR scan</CardTitle>
+                <CardDescription>
+                  <span className="text-green-500">additions</span>{" "}
+                  <span className="text-red-400">deletions</span>
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="whitespace-pre-wrap">{diffContent}</div>
+              </CardContent>
             </TabsContent>
             <TabsContent value="Content1">
               <Card>

@@ -146,14 +146,14 @@ export default function Home() {
           <h2 className="young-serif text-2xl font-bold text-center mt-8">
             Preview
           </h2>
-          <Tabs defaultValue="File1" className="">
+          <Tabs defaultValue="File1" className="w-full max-w-3xl mx-auto">
             <TabsList>
               <TabsTrigger value="File1">File 1</TabsTrigger>
               <TabsTrigger value="File2">File 2</TabsTrigger>
             </TabsList>
 
             <TabsContent value="File1">
-              <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
+              <div className="mt-4 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
                 <iframe
                   src={preview.url || undefined}
                   width="100%"
@@ -164,15 +164,15 @@ export default function Home() {
               </div>
             </TabsContent>
             <TabsContent value="File2">
-                <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
-                  <iframe
-                    src={preview2.url || undefined}
-                    width="100%"
-                    height="800px"
-                    className="rounded-lg"
-                    title="PDF Preview"
-                  />
-                </div>
+              <div className="mt-4 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
+                <iframe
+                  src={preview2.url || undefined}
+                  width="100%"
+                  height="800px"
+                  className="rounded-lg"
+                  title="PDF Preview"
+                />
+              </div>
             </TabsContent>
           </Tabs>
         </section>
