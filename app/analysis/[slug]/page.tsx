@@ -17,6 +17,8 @@ import * as pdfjs from "pdfjs-dist";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Textarea } from "@/components/ui/textarea";
+import Spinner from "@/components/ui/spinner";
+import clsx from "clsx";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -144,27 +146,34 @@ export default function Page({
               </TabsList>
 
             <TabsContent value="Differences">
-              <CardHeader>
-                <CardTitle>Differences with OCR scan</CardTitle>
-                <CardDescription>
-                  <span className="text-green-500">additions</span>{" "}
-                  <span className="text-red-400">deletions</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="whitespace-pre-wrap">{diffContent}</div>
-              </CardContent>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Differences with OCR scan</CardTitle>
+                  <CardDescription>
+                    <span className="text-green-500">additions</span>{" "}
+                    <span className="text-red-400">deletions</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className={clsx("h-[700px] max-h-[700px]", {"overflow-y-scroll" : diffContent }, {"flex items-center justify-center": !diffContent})}>
+                  {diffContent ? (
+                    diffContent
+                  ) : (
+                    <span className="flex justify-center items-center gap-4"><Spinner />Conducting Analysis...</span>
+                  )}
+                  <div className="whitespace-pre-wrap">{diffContent}</div>
+                </CardContent>
+              </Card>
             </TabsContent>
             <TabsContent value="Content1">
               <Card>
                 <CardHeader>
                   <CardTitle>OCR scan of PDF 1</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className={clsx("h-[700px] max-h-[700px]", {"overflow-y-scroll" : diffContent }, {"flex items-center justify-center": !diffContent})}>
                   {ocrContent2 ? (
                     <div className="whitespace-pre-wrap">{ocrContent1}</div>
                   ) : (
-                    <p>Loading OCR content...</p>
+                    <span className="flex justify-center items-center gap-4"><Spinner />Parsing PDF...</span>
                   )}
                 </CardContent>
               </Card>
@@ -174,11 +183,11 @@ export default function Page({
                 <CardHeader>
                   <CardTitle>OCR scan of PDF 2</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className={clsx("h-[700px] max-h-[700px]", {"overflow-y-scroll" : diffContent }, {"flex items-center justify-center": !diffContent})}>
                   {ocrContent2 ? (
                     <div className="whitespace-pre-wrap">{ocrContent2}</div>
                   ) : (
-                    <p>Loading OCR content...</p>
+                    <span className="flex justify-center items-center gap-4"><Spinner />Parsing PDF...</span>
                   )}
                 </CardContent>
               </Card>
