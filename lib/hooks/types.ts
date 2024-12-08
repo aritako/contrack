@@ -1,10 +1,10 @@
 import { ComparisonDocument } from "@/models/comparison";
 
 export interface useUploadModel {
-  filePDF: File | null;
-  setFilePDF: (file: File | null) => void;
-  fileImage: File | null;
-  setFileImage: (file: File | null) => void;
+  filePDF1: File | null;
+  setFilePDF1: (file: File | null) => void;
+  filePDF2: File | null;
+  setFilePDF2: (file: File | null) => void;
   uploadFile: () => Promise<void>;
   status: uploadStatus;
 }

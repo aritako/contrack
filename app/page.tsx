@@ -16,7 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
-  const { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status } =
+  const { filePDF1, setFilePDF1, filePDF2, setFilePDF2, uploadFile, status } =
     useUpload();
   const [preview, setPreview] = useState<PreviewFile>({
     url: null,
@@ -27,55 +27,32 @@ export default function Home() {
     error: null,
   });
 
-  const fileInputPDFRef = useRef<HTMLInputElement>(null);
-  const fileInputImageRef = useRef<HTMLInputElement>(null);
+  const fileInputPDFRef1 = useRef<HTMLInputElement>(null);
+  const fileInputPDFRef2 = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  function handlePDFChange(event: ChangeEvent<HTMLInputElement>): void {
+  function handleFileChange(
+    event: ChangeEvent<HTMLInputElement>,
+    setFile: (file: File | null) => void,
+    setPreview: (preview: PreviewFile) => void,
+    fileInputRef: React.RefObject<HTMLInputElement>
+  ): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
-    if (preview.url) URL.revokeObjectURL(preview.url);
-
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
         setPreview({
           url: null,
           error: "Invalid file type. Please upload a PDF.",
         });
-        setFilePDF(null);
-        if (fileInputPDFRef.current) fileInputPDFRef.current.value = "";
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
-        setFilePDF(selectedFile);
+        setFile(selectedFile);
         setPreview({ url: URL.createObjectURL(selectedFile), error: null });
       }
     } else {
-      setFilePDF(null);
+      setFile(null);
       setPreview({ url: null, error: null });
-    }
-  }
-
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>): void {
-    const selectedFile = event.target.files ? event.target.files[0] : null;
-    // if (previewImage.url) URL.revokeObjectURL(previewImage.url);
-
-    if (selectedFile) {
-      // if (!selectedFile.type.startsWith('image/')) {
-      if (selectedFile.type !== "application/pdf") {
-        // setPreviewImage({ url: null, error: 'Invalid file type. Please upload an image.' });
-        setPreview2({
-          url: null,
-          error: "Invalid file type. Please upload a PDF.",
-        });
-        setFileImage(null);
-        if (fileInputImageRef.current) fileInputImageRef.current.value = "";
-      } else {
-        setFileImage(selectedFile);
-        // setPreviewImage({ url: URL.createObjectURL(selectedFile), error: null });
-        setPreview2({ url: URL.createObjectURL(selectedFile), error: null });
-      }
-    } else {
-      setFileImage(null);
-      // setPreviewImage({ url: null, error: null });
-      setPreview2({ url: null, error: null });
     }
   }
 
@@ -83,7 +60,7 @@ export default function Home() {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
-    console.log("submit", filePDF);
+    console.log("submit", filePDF1);
     await uploadFile();
   }
 
@@ -111,16 +88,16 @@ export default function Home() {
             <Input
               id="file"
               type="file"
-              onChange={handlePDFChange}
-              ref={fileInputPDFRef}
+              onChange={(event) => handleFileChange(event, setFilePDF1, setPreview, fileInputPDFRef1)}
+              ref={fileInputPDFRef1}
             />
             <Input
               id="file"
               type="file"
-              onChange={handleImageChange}
-              ref={fileInputPDFRef}
+              onChange={(event) => handleFileChange(event, setFilePDF2, setPreview2, fileInputPDFRef2)}
+              ref={fileInputPDFRef2}
             />
-            <Button type="submit" disabled={!filePDF}>
+            <Button type="submit" disabled={!filePDF1 && !filePDF2}>
               Analyze <ArrowRight />
             </Button>
           </form>

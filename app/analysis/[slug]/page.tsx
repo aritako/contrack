@@ -43,8 +43,8 @@ export default function Page({
         console.log("DATA RETRIEVED", data);
         setComparisonData(data);
 
-        const pdfUrl1 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf.key}`;
-        const pdfUrl2 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.image.key}`;
+        const pdfUrl1 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf_1.key}`;
+        const pdfUrl2 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf_2.key}`;
         const [ocrText1, ocrText2] = await Promise.all([
           extractTextFromPdf(pdfUrl1),
           extractTextFromPdf(pdfUrl2),
@@ -100,9 +100,9 @@ export default function Page({
             </TabsList>
             <TabsContent value="PDF1">
               <div className="w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
-                {comparisonData?.pdf.key ? (
+                {comparisonData?.pdf_1.key ? (
                   <iframe
-                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf.key}`}
+                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf_1.key}`}
                     width="100%"
                     height="800px"
                     title="Uploaded PDF"
@@ -115,9 +115,9 @@ export default function Page({
             </TabsContent>
             <TabsContent value="PDF2">
               <div className="w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
-                {comparisonData?.pdf.key ? (
+                {comparisonData?.pdf_2.key ? (
                   <iframe
-                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.image.key}`}
+                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf_2.key}`}
                     width="100%"
                     height="800px"
                     title="Uploaded Image"

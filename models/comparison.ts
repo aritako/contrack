@@ -11,8 +11,8 @@ export interface FileMetadata {
 export interface ComparisonDocument extends Document {
   comparison_id: string;
   user_id: number;
-  pdf: FileMetadata;
-  image: FileMetadata;
+  pdf_1: FileMetadata;
+  pdf_2: FileMetadata;
   status: 'pending' | 'processing' | 'completed';
   result: string | null; // e.g., match, mismatch, or additional details
 }
@@ -28,8 +28,8 @@ export const FileMetadataSchema: Schema = new Schema<FileMetadata>({
 export const ComparisonSchema: Schema<ComparisonDocument> = new Schema<ComparisonDocument>({
   comparison_id: { type: String, required: true, unique: true },
   user_id: { type: Number, required: true },
-  pdf: { type: FileMetadataSchema, required: true },
-  image: { type: FileMetadataSchema, required: true },
+  pdf_1: { type: FileMetadataSchema, required: true },
+  pdf_2: { type: FileMetadataSchema, required: true },
   status: { type: String, enum: ['pending', 'processing', 'completed'], default: 'pending' },
   result: { type: String, default: null },
 }, { collection: 'comparison' });
