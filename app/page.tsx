@@ -99,11 +99,11 @@ export default function Home() {
         <div className="max-w-xl">
           <div className="flex flex-col items-center mb-8">
             <h2 className="young-serif text-6xl max-w-xl text-center mb-4">
-              Review Legal Documents Fast.
+              Review Legal Contracts Fast.
             </h2>
             <span className="text-lg text-center">
-              Effortlessly Spot Differences between Hard and Soft copies of
-              Contracts with AI-Powered Readers.
+              Effortlessly Spot Differences between Hard and Soft Copies of
+              Contracts with AI-Powered Analysis.
             </span>
           </div>
 
