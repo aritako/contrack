@@ -14,6 +14,9 @@ import { useParams } from "next/navigation";
 import Tesseract from "tesseract.js";
 import { differences } from "@/lib/utils";
 import * as pdfjs from "pdfjs-dist";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Textarea } from "@/components/ui/textarea";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -80,7 +83,7 @@ export default function Page({
         await page.render({ canvasContext: context, viewport }).promise;
 
         const result = await Tesseract.recognize(canvas.toDataURL(), "eng", {
-          logger: (m) => console.log(m),
+          logger: (m) => console.log("IM WORKING",m),
         });
         fullText += result.data.text + "\n";
       }
@@ -133,11 +136,13 @@ export default function Page({
         {/* Right side: Analysis */}
         <div className="pl-4">
           <Tabs defaultValue="Differences" className="w-full">
-            <TabsList>
-              <TabsTrigger value="Differences">Differences</TabsTrigger>
-              <TabsTrigger value="Content1">Content 1</TabsTrigger>
-              <TabsTrigger value="Content2">Content 2</TabsTrigger>
-            </TabsList>
+              <TabsList>
+                <TabsTrigger value="Differences">Differences</TabsTrigger>
+                <TabsTrigger value="Content1">Content 1</TabsTrigger>
+                <TabsTrigger value="Content2">Content 2</TabsTrigger>
+                <TabsTrigger value="Email">Email</TabsTrigger>
+              </TabsList>
+
             <TabsContent value="Differences">
               <CardHeader>
                 <CardTitle>Differences with OCR scan</CardTitle>
@@ -178,7 +183,21 @@ export default function Page({
                 </CardContent>
               </Card>
             </TabsContent>
+            <TabsContent value="Email">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Email</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea placeholder="Send the results of the comparison to someone."/>
+                  <Button className="mt-4">
+                    <Link href="/email">Send Email</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
+
         </div>
       </div>
     </div>
