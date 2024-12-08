@@ -17,11 +17,11 @@ export async function computeSHA256(file: File) {
 export function differences(in1: string, in2: string) {
   const diff = diffWords(in1, in2);
   const parts = diff.map(
-    (part,index) => {
+    (part: { added?: boolean; removed?: boolean; value: string }, index: number) => {
       return (
-        part.added ? <p key={index} className="text-green-500">{part.value}</p> :
-        part.removed ? <p key={index} className="text-red-400">{part.value}</p> :
-        <p key={index}>{part.value}</p>
+        part.added ? <span key={index} className="text-green-500">{part.value}</span> :
+        part.removed ? <span key={index} className="text-red-400">{part.value}</span> :
+        <span key={index}>{part.value}</span>
       );
     }
   );
