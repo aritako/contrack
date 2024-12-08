@@ -78,13 +78,20 @@ export default function Home() {
             <h2 className="young-serif text-6xl max-w-xl text-center mb-4">
               Review Legal Contracts Fast.
             </h2>
-            <span className="text-lg text-center">
+            <span className="text-lg text-center mb-8">
               Effortlessly Spot Differences between Hard and Soft Copies of
               Contracts with AI-Powered Analysis.
             </span>
+
+            <h3 className="young-serif text-3xl mb-2">
+              Version Difference Checker
+            </h3>
+            <span className = "italic text-sm">
+              Upload two PDF files to compare them for differences.
+            </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex mb-4 gap-2">
+          <form onSubmit={handleSubmit} className="flex flex-col mb-4 gap-2">
             <Input
               id="file"
               type="file"
