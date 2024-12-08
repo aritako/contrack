@@ -1,21 +1,28 @@
-'use client';
-import { useState, ChangeEvent, FormEvent, useRef, useEffect } from 'react';
-import useUpload from '@/lib/hooks/useUpload';
-import { useRouter } from 'next/navigation';
-import { young_serif } from '@/lib/fonts/fonts';
-import './globals.css';
-import './styles.css';
-import Navbar from './components/navbar';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { AlertCircle, ArrowRight } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getSignedURL } from '../lib/signatures/aws-s3/sign-url-pdf';
-import { PreviewFile } from './types';
+"use client";
+import { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
+import useUpload from "@/lib/hooks/useUpload";
+import { useRouter } from "next/navigation";
+import { young_serif } from "@/lib/fonts/fonts";
+import "./globals.css";
+import "./styles.css";
+import Navbar from "./components/navbar";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { AlertCircle, ArrowRight } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { getSignedURL } from "../lib/signatures/aws-s3/sign-url-pdf";
+import { PreviewFile } from "./types";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function Home() {
-  const { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status } = useUpload();
+  const { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status } =
+    useUpload();
   const [preview, setPreview] = useState<PreviewFile>({
+    url: null,
+    error: null,
+  });
+  const [preview2, setPreview2] = useState<PreviewFile>({
     url: null,
     error: null,
   });
@@ -29,10 +36,13 @@ export default function Home() {
     if (preview.url) URL.revokeObjectURL(preview.url);
 
     if (selectedFile) {
-      if (selectedFile.type !== 'application/pdf') {
-        setPreview({ url: null, error: 'Invalid file type. Please upload a PDF.' });
+      if (selectedFile.type !== "application/pdf") {
+        setPreview({
+          url: null,
+          error: "Invalid file type. Please upload a PDF.",
+        });
         setFilePDF(null);
-        if (fileInputPDFRef.current) fileInputPDFRef.current.value = '';
+        if (fileInputPDFRef.current) fileInputPDFRef.current.value = "";
       } else {
         setFilePDF(selectedFile);
         setPreview({ url: URL.createObjectURL(selectedFile), error: null });
@@ -49,20 +59,23 @@ export default function Home() {
 
     if (selectedFile) {
       // if (!selectedFile.type.startsWith('image/')) {
-      if (selectedFile.type !== 'application/pdf') {
+      if (selectedFile.type !== "application/pdf") {
         // setPreviewImage({ url: null, error: 'Invalid file type. Please upload an image.' });
-        setPreview({ url: null, error: 'Invalid file type. Please upload a PDF.' });
+        setPreview2({
+          url: null,
+          error: "Invalid file type. Please upload a PDF.",
+        });
         setFileImage(null);
-        if (fileInputImageRef.current) fileInputImageRef.current.value = '';
+        if (fileInputImageRef.current) fileInputImageRef.current.value = "";
       } else {
         setFileImage(selectedFile);
         // setPreviewImage({ url: URL.createObjectURL(selectedFile), error: null });
-        setPreview({ url: URL.createObjectURL(selectedFile), error: null });
+        setPreview2({ url: URL.createObjectURL(selectedFile), error: null });
       }
     } else {
       setFileImage(null);
       // setPreviewImage({ url: null, error: null });
-      setPreview({ url: null, error: null });
+      setPreview2({ url: null, error: null });
     }
   }
 
@@ -70,7 +83,7 @@ export default function Home() {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
-    console.log('submit', filePDF);
+    console.log("submit", filePDF);
     await uploadFile();
   }
 
@@ -89,7 +102,8 @@ export default function Home() {
               Review Legal Documents Fast.
             </h2>
             <span className="text-lg text-center">
-              Effortlessly Spot Differences between Hard and Soft copies of Contracts with AI-Powered Readers.
+              Effortlessly Spot Differences between Hard and Soft copies of
+              Contracts with AI-Powered Readers.
             </span>
           </div>
 
@@ -127,20 +141,40 @@ export default function Home() {
           </div>
         )}
       </section>
-      {preview.url && (
+      {(preview.url || preview2.url) && (
         <section>
           <h2 className="young-serif text-2xl font-bold text-center mt-8">
             Preview
           </h2>
-          <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
-            <iframe
-              src={preview.url}
-              width="100%"
-              height="800px"
-              className="rounded-lg"
-              title="PDF Preview"
-            />
-          </div>
+          <Tabs defaultValue="File1" className="">
+            <TabsList>
+              <TabsTrigger value="File1">File 1</TabsTrigger>
+              <TabsTrigger value="File2">File 2</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="File1">
+              <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
+                <iframe
+                  src={preview.url || undefined}
+                  width="100%"
+                  height="800px"
+                  className="rounded-lg"
+                  title="PDF Preview"
+                />
+              </div>
+            </TabsContent>
+            <TabsContent value="File2">
+                <div className="mt-8 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
+                  <iframe
+                    src={preview2.url || undefined}
+                    width="100%"
+                    height="800px"
+                    className="rounded-lg"
+                    title="PDF Preview"
+                  />
+                </div>
+            </TabsContent>
+          </Tabs>
         </section>
       )}
     </>
