@@ -14,6 +14,11 @@ import { useParams } from "next/navigation";
 import Tesseract from "tesseract.js";
 import { differences } from "@/lib/utils";
 import * as pdfjs from "pdfjs-dist";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Textarea } from "@/components/ui/textarea";
+import Spinner from "@/components/ui/spinner";
+import clsx from "clsx";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -43,8 +48,8 @@ export default function Page({
         console.log("DATA RETRIEVED", data);
         setComparisonData(data);
 
-        const pdfUrl1 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf.key}`;
-        const pdfUrl2 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.image.key}`;
+        const pdfUrl1 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf_1.key}`;
+        const pdfUrl2 = `${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${data.pdf_2.key}`;
         const [ocrText1, ocrText2] = await Promise.all([
           extractTextFromPdf(pdfUrl1),
           extractTextFromPdf(pdfUrl2),
@@ -80,7 +85,7 @@ export default function Page({
         await page.render({ canvasContext: context, viewport }).promise;
 
         const result = await Tesseract.recognize(canvas.toDataURL(), "eng", {
-          logger: (m) => console.log(m),
+          logger: (m) => console.log("IM WORKING",m),
         });
         fullText += result.data.text + "\n";
       }
@@ -100,9 +105,9 @@ export default function Page({
             </TabsList>
             <TabsContent value="PDF1">
               <div className="w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
-                {comparisonData?.pdf.key ? (
+                {comparisonData?.pdf_1.key ? (
                   <iframe
-                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf.key}`}
+                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf_1.key}`}
                     width="100%"
                     height="800px"
                     title="Uploaded PDF"
@@ -115,9 +120,9 @@ export default function Page({
             </TabsContent>
             <TabsContent value="PDF2">
               <div className="w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
-                {comparisonData?.pdf.key ? (
+                {comparisonData?.pdf_2.key ? (
                   <iframe
-                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.image.key}`}
+                    src={`${process.env.NEXT_PUBLIC_AWS_S3_ENDPOINT_URL}/${comparisonData.pdf_2.key}`}
                     width="100%"
                     height="800px"
                     title="Uploaded Image"
@@ -133,33 +138,42 @@ export default function Page({
         {/* Right side: Analysis */}
         <div className="pl-4">
           <Tabs defaultValue="Differences" className="w-full">
-            <TabsList>
-              <TabsTrigger value="Differences">Differences</TabsTrigger>
-              <TabsTrigger value="Content1">Content 1</TabsTrigger>
-              <TabsTrigger value="Content2">Content 2</TabsTrigger>
-            </TabsList>
+              <TabsList>
+                <TabsTrigger value="Differences">Differences</TabsTrigger>
+                <TabsTrigger value="Content1">Content 1</TabsTrigger>
+                <TabsTrigger value="Content2">Content 2</TabsTrigger>
+                <TabsTrigger value="Email">Email</TabsTrigger>
+              </TabsList>
+
             <TabsContent value="Differences">
-              <CardHeader>
-                <CardTitle>Differences with OCR scan</CardTitle>
-                <CardDescription>
-                  <span className="text-green-500">additions</span>{" "}
-                  <span className="text-red-400">deletions</span>
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="whitespace-pre-wrap">{diffContent}</div>
-              </CardContent>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Differences with OCR scan</CardTitle>
+                  <CardDescription>
+                    <span className="text-green-500">additions</span>{" "}
+                    <span className="text-red-400">deletions</span>
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className={clsx("h-[700px] max-h-[700px]", {"overflow-y-scroll" : diffContent }, {"flex items-center justify-center": !diffContent})}>
+                  {diffContent ? (
+                    diffContent
+                  ) : (
+                    <span className="flex justify-center items-center gap-4"><Spinner />Conducting Analysis...</span>
+                  )}
+                  <div className="whitespace-pre-wrap">{diffContent}</div>
+                </CardContent>
+              </Card>
             </TabsContent>
             <TabsContent value="Content1">
               <Card>
                 <CardHeader>
                   <CardTitle>OCR scan of PDF 1</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className={clsx("h-[700px] max-h-[700px]", {"overflow-y-scroll" : diffContent }, {"flex items-center justify-center": !diffContent})}>
                   {ocrContent2 ? (
                     <div className="whitespace-pre-wrap">{ocrContent1}</div>
                   ) : (
-                    <p>Loading OCR content...</p>
+                    <span className="flex justify-center items-center gap-4"><Spinner />Parsing PDF...</span>
                   )}
                 </CardContent>
               </Card>
@@ -169,16 +183,30 @@ export default function Page({
                 <CardHeader>
                   <CardTitle>OCR scan of PDF 2</CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className={clsx("h-[700px] max-h-[700px]", {"overflow-y-scroll" : diffContent }, {"flex items-center justify-center": !diffContent})}>
                   {ocrContent2 ? (
                     <div className="whitespace-pre-wrap">{ocrContent2}</div>
                   ) : (
-                    <p>Loading OCR content...</p>
+                    <span className="flex justify-center items-center gap-4"><Spinner />Parsing PDF...</span>
                   )}
                 </CardContent>
               </Card>
             </TabsContent>
+            <TabsContent value="Email">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Email</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Textarea placeholder="Send the results of the comparison to someone."/>
+                  <Button className="mt-4">
+                    <Link href="/email">Send Email</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
           </Tabs>
+
         </div>
       </div>
     </div>

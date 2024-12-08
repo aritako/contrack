@@ -7,8 +7,8 @@ import { ComparisonDocument } from '@/models/comparison';
 import { v4 as uuidv4 } from 'uuid';
 
 export default function useUpload(): useUploadModel {
-  const [filePDF, setFilePDF] = useState<File | null>(null);
-  const [fileImage, setFileImage] = useState<File | null>(null);
+  const [filePDF1, setFilePDF1] = useState<File | null>(null);
+  const [filePDF2, setFilePDF2] = useState<File | null>(null);
   const [status, setStatus] = useState<uploadStatus>({
     message: null,
     key: null,
@@ -28,46 +28,46 @@ export default function useUpload(): useUploadModel {
   }
 
   const uploadFile: () => Promise<void> = async () => {
-    if (!filePDF || !fileImage) {
+    if (!filePDF1 || !filePDF2) {
       setStatus({ message: null, key: null, error: 'No file selected.' });
       return;
     }
     try {
-      const pdfSignedURL = await validateSignedURL(filePDF);
-      const imageSignedURL = await validateSignedURL(fileImage);
+      const pdfSignedURL1 = await validateSignedURL(filePDF1);
+      const pdfSignedURL2 = await validateSignedURL(filePDF2);
       await Promise.all([
-        fetch(pdfSignedURL.url, {
+        fetch(pdfSignedURL1.url, {
           method: 'PUT',
-          body: filePDF,
-          headers: { 'Content-Type': filePDF.type },
+          body: filePDF1,
+          headers: { 'Content-Type': filePDF1.type },
         }),
-        fetch(imageSignedURL.url, {
+        fetch(pdfSignedURL2.url, {
           method: 'PUT',
-          body: fileImage,
-          headers: { 'Content-Type': fileImage.type },
+          body: filePDF2,
+          headers: { 'Content-Type': filePDF2.type },
         }),
       ]);
 
-      const pdfMetadata: FileMetadata = {
-        key: pdfSignedURL.key,
-        fileName: filePDF.name,
-        contentType: filePDF.type,
-        fileSize: filePDF.size,
+      const pdfMetadata1: FileMetadata = {
+        key: pdfSignedURL1.key,
+        fileName: filePDF1.name,
+        contentType: filePDF1.type,
+        fileSize: filePDF1.size,
         uploadTime: new Date(),
       }
-      const imageMetadata: FileMetadata = {
-        key: imageSignedURL.key,
-        fileName: fileImage.name,
-        contentType: fileImage.type,
-        fileSize: fileImage.size,
+      const pdfMetadata2: FileMetadata = {
+        key: pdfSignedURL2.key,
+        fileName: filePDF2.name,
+        contentType: filePDF2.type,
+        fileSize: filePDF2.size,
         uploadTime: new Date(),
       }
 
       const comparisonMetadata: Partial<ComparisonDocument> = {
         comparison_id: uuidv4(),
         user_id: 1,
-        pdf: pdfMetadata,
-        image: imageMetadata,
+        pdf_1: pdfMetadata1,
+        pdf_2: pdfMetadata2,
         status: 'pending',
         result: null,
       } as ComparisonDocument;
@@ -100,5 +100,5 @@ export default function useUpload(): useUploadModel {
       return;
     }
   };
-  return { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status };
+  return { filePDF1, setFilePDF1, filePDF2, setFilePDF2, uploadFile, status };
 }

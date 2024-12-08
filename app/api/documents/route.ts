@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
     const comparison = new ComparisonModel({
       comparison_id: body.comparison_id,
       user_id: body.user_id,
-      pdf: body.pdf,
-      image: body.image,
+      pdf_1: body.pdf_1,
+      pdf_2: body.pdf_2,
       status: body.status,
       result: body.result,
     });

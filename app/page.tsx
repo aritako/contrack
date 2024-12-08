@@ -14,11 +14,12 @@ import { getSignedURL } from "../lib/signatures/aws-s3/sign-url-pdf";
 import { PreviewFile } from "./types";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Spinner from "@/components/ui/spinner";
 
 export default function Home() {
-  const { filePDF, setFilePDF, fileImage, setFileImage, uploadFile, status } =
+  const { filePDF1, setFilePDF1, filePDF2, setFilePDF2, uploadFile, status } =
     useUpload();
-  const [preview, setPreview] = useState<PreviewFile>({
+  const [preview1, setPreview] = useState<PreviewFile>({
     url: null,
     error: null,
   });
@@ -26,56 +27,35 @@ export default function Home() {
     url: null,
     error: null,
   });
-
-  const fileInputPDFRef = useRef<HTMLInputElement>(null);
-  const fileInputImageRef = useRef<HTMLInputElement>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const fileInputPDFRef1 = useRef<HTMLInputElement>(null);
+  const fileInputPDFRef2 = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
-  function handlePDFChange(event: ChangeEvent<HTMLInputElement>): void {
+  function handleFileChange(
+    event: ChangeEvent<HTMLInputElement>,
+    setFile: (file: File | null) => void,
+    preview: PreviewFile,
+    setPreview: (preview: PreviewFile) => void,
+    fileInputRef: React.RefObject<HTMLInputElement>
+  ): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
     if (preview.url) URL.revokeObjectURL(preview.url);
-
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
         setPreview({
           url: null,
           error: "Invalid file type. Please upload a PDF.",
         });
-        setFilePDF(null);
-        if (fileInputPDFRef.current) fileInputPDFRef.current.value = "";
+        setFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
-        setFilePDF(selectedFile);
+        setFile(selectedFile);
         setPreview({ url: URL.createObjectURL(selectedFile), error: null });
       }
     } else {
-      setFilePDF(null);
+      setFile(null);
       setPreview({ url: null, error: null });
-    }
-  }
-
-  function handleImageChange(event: ChangeEvent<HTMLInputElement>): void {
-    const selectedFile = event.target.files ? event.target.files[0] : null;
-    // if (previewImage.url) URL.revokeObjectURL(previewImage.url);
-
-    if (selectedFile) {
-      // if (!selectedFile.type.startsWith('image/')) {
-      if (selectedFile.type !== "application/pdf") {
-        // setPreviewImage({ url: null, error: 'Invalid file type. Please upload an image.' });
-        setPreview2({
-          url: null,
-          error: "Invalid file type. Please upload a PDF.",
-        });
-        setFileImage(null);
-        if (fileInputImageRef.current) fileInputImageRef.current.value = "";
-      } else {
-        setFileImage(selectedFile);
-        // setPreviewImage({ url: URL.createObjectURL(selectedFile), error: null });
-        setPreview2({ url: URL.createObjectURL(selectedFile), error: null });
-      }
-    } else {
-      setFileImage(null);
-      // setPreviewImage({ url: null, error: null });
-      setPreview2({ url: null, error: null });
     }
   }
 
@@ -83,8 +63,14 @@ export default function Home() {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
-    console.log("submit", filePDF);
-    await uploadFile();
+    try{
+      setLoading(true);
+      await uploadFile();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -99,36 +85,58 @@ export default function Home() {
         <div className="max-w-xl">
           <div className="flex flex-col items-center mb-8">
             <h2 className="young-serif text-6xl max-w-xl text-center mb-4">
-              Review Legal Documents Fast.
+              Review Legal Contracts Fast.
             </h2>
-            <span className="text-lg text-center">
-              Effortlessly Spot Differences between Hard and Soft copies of
-              Contracts with AI-Powered Readers.
+            <span className="text-lg text-center mb-8">
+              Effortlessly Spot Differences between Hard and Soft Copies of
+              Contracts with AI-Powered Analysis.
+            </span>
+
+            <h3 className="young-serif text-3xl mb-2">
+              Version Difference Checker
+            </h3>
+            <span className = "italic text-sm">
+              Upload two PDF files to compare them for differences.
             </span>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex mb-4 gap-2">
+          <form onSubmit={handleSubmit} className="flex flex-col mb-4 gap-2">
             <Input
               id="file"
               type="file"
-              onChange={handlePDFChange}
-              ref={fileInputPDFRef}
+              onChange={(event) => handleFileChange(event, setFilePDF1, preview1, setPreview, fileInputPDFRef1)}
+              ref={fileInputPDFRef1}
             />
             <Input
               id="file"
               type="file"
-              onChange={handleImageChange}
-              ref={fileInputPDFRef}
+              onChange={(event) => handleFileChange(event, setFilePDF2, preview2, setPreview2, fileInputPDFRef2)}
+              ref={fileInputPDFRef2}
             />
-            <Button type="submit" disabled={!filePDF}>
-              Analyze <ArrowRight />
+            <Button type="submit" disabled={loading || !(filePDF1 && filePDF2)}>
+              {loading ? (
+                <>
+                  <Spinner/>
+                </>
+              ) : (
+                <>
+                  Analyze <ArrowRight />
+                </>
+              )}
             </Button>
           </form>
-          {preview.error && (
+          {preview1.error && (
             <Alert className="mt-4 border-red-400 text-red-400">
               <AlertCircle className="stroke-red-400 h-4 w-4" />
-              <AlertTitle>File Type Error.</AlertTitle>
-              <AlertDescription>{preview.error}</AlertDescription>
+              <AlertTitle>File Type Error on File 1.</AlertTitle>
+              <AlertDescription>{preview1.error}</AlertDescription>
+            </Alert>
+          )}
+          {preview2.error && (
+            <Alert className="mt-4 border-red-400 text-red-400">
+              <AlertCircle className="stroke-red-400 h-4 w-4" />
+              <AlertTitle>File Type Error on File 2.</AlertTitle>
+              <AlertDescription>{preview2.error}</AlertDescription>
             </Alert>
           )}
         </div>
@@ -141,7 +149,7 @@ export default function Home() {
           </div>
         )}
       </section>
-      {(preview.url || preview2.url) && (
+      {(preview1.url || preview2.url) && (
         <section>
           <h2 className="young-serif text-2xl font-bold text-center mt-8">
             Preview
@@ -155,11 +163,11 @@ export default function Home() {
             <TabsContent value="File1">
               <div className="mt-4 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
                 <iframe
-                  src={preview.url || undefined}
+                  src={preview1.url || undefined}
                   width="100%"
                   height="800px"
                   className="rounded-lg"
-                  title="PDF Preview"
+                  title="PDF Preview 1"
                 />
               </div>
             </TabsContent>
@@ -170,7 +178,7 @@ export default function Home() {
                   width="100%"
                   height="800px"
                   className="rounded-lg"
-                  title="PDF Preview"
+                  title="PDF Preview 2"
                 />
               </div>
             </TabsContent>
