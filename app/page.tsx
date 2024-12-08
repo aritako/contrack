@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function Home() {
   const { filePDF1, setFilePDF1, filePDF2, setFilePDF2, uploadFile, status } =
     useUpload();
-  const [preview, setPreview] = useState<PreviewFile>({
+  const [preview1, setPreview] = useState<PreviewFile>({
     url: null,
     error: null,
   });
@@ -34,10 +34,12 @@ export default function Home() {
   function handleFileChange(
     event: ChangeEvent<HTMLInputElement>,
     setFile: (file: File | null) => void,
+    preview: PreviewFile,
     setPreview: (preview: PreviewFile) => void,
     fileInputRef: React.RefObject<HTMLInputElement>
   ): void {
     const selectedFile = event.target.files ? event.target.files[0] : null;
+    if (preview.url) URL.revokeObjectURL(preview.url);
     if (selectedFile) {
       if (selectedFile.type !== "application/pdf") {
         setPreview({
@@ -95,24 +97,31 @@ export default function Home() {
             <Input
               id="file"
               type="file"
-              onChange={(event) => handleFileChange(event, setFilePDF1, setPreview, fileInputPDFRef1)}
+              onChange={(event) => handleFileChange(event, setFilePDF1, preview1, setPreview, fileInputPDFRef1)}
               ref={fileInputPDFRef1}
             />
             <Input
               id="file"
               type="file"
-              onChange={(event) => handleFileChange(event, setFilePDF2, setPreview2, fileInputPDFRef2)}
+              onChange={(event) => handleFileChange(event, setFilePDF2, preview2, setPreview2, fileInputPDFRef2)}
               ref={fileInputPDFRef2}
             />
             <Button type="submit" disabled={!filePDF1 && !filePDF2}>
               Analyze <ArrowRight />
             </Button>
           </form>
-          {preview.error && (
+          {preview1.error && (
             <Alert className="mt-4 border-red-400 text-red-400">
               <AlertCircle className="stroke-red-400 h-4 w-4" />
-              <AlertTitle>File Type Error.</AlertTitle>
-              <AlertDescription>{preview.error}</AlertDescription>
+              <AlertTitle>File Type Error on File 1.</AlertTitle>
+              <AlertDescription>{preview1.error}</AlertDescription>
+            </Alert>
+          )}
+          {preview2.error && (
+            <Alert className="mt-4 border-red-400 text-red-400">
+              <AlertCircle className="stroke-red-400 h-4 w-4" />
+              <AlertTitle>File Type Error on File 2.</AlertTitle>
+              <AlertDescription>{preview2.error}</AlertDescription>
             </Alert>
           )}
         </div>
@@ -125,7 +134,7 @@ export default function Home() {
           </div>
         )}
       </section>
-      {(preview.url || preview2.url) && (
+      {(preview1.url || preview2.url) && (
         <section>
           <h2 className="young-serif text-2xl font-bold text-center mt-8">
             Preview
@@ -139,11 +148,11 @@ export default function Home() {
             <TabsContent value="File1">
               <div className="mt-4 w-full max-w-3xl mx-auto border border-stone-700 shadow-lg rounded-lg overflow-hidden">
                 <iframe
-                  src={preview.url || undefined}
+                  src={preview1.url || undefined}
                   width="100%"
                   height="800px"
                   className="rounded-lg"
-                  title="PDF Preview"
+                  title="PDF Preview 1"
                 />
               </div>
             </TabsContent>
@@ -154,7 +163,7 @@ export default function Home() {
                   width="100%"
                   height="800px"
                   className="rounded-lg"
-                  title="PDF Preview"
+                  title="PDF Preview 2"
                 />
               </div>
             </TabsContent>
