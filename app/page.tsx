@@ -14,6 +14,7 @@ import { getSignedURL } from "../lib/signatures/aws-s3/sign-url-pdf";
 import { PreviewFile } from "./types";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Spinner from "@/components/ui/spinner";
 
 export default function Home() {
   const { filePDF1, setFilePDF1, filePDF2, setFilePDF2, uploadFile, status } =
@@ -26,7 +27,7 @@ export default function Home() {
     url: null,
     error: null,
   });
-
+  const [loading, setLoading] = useState<boolean>(false);
   const fileInputPDFRef1 = useRef<HTMLInputElement>(null);
   const fileInputPDFRef2 = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -62,8 +63,14 @@ export default function Home() {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> {
     event.preventDefault();
-    console.log("submit", filePDF1);
-    await uploadFile();
+    try{
+      setLoading(true);
+      await uploadFile();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -106,8 +113,16 @@ export default function Home() {
               onChange={(event) => handleFileChange(event, setFilePDF2, preview2, setPreview2, fileInputPDFRef2)}
               ref={fileInputPDFRef2}
             />
-            <Button type="submit" disabled={!filePDF1 && !filePDF2}>
-              Analyze <ArrowRight />
+            <Button type="submit" disabled={loading || !(filePDF1 && filePDF2)}>
+              {loading ? (
+                <>
+                  <Spinner/>
+                </>
+              ) : (
+                <>
+                  Analyze <ArrowRight />
+                </>
+              )}
             </Button>
           </form>
           {preview1.error && (
